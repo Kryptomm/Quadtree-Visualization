@@ -7,20 +7,20 @@ public:
 	double width;
 	double height;
 
-	Box(sf::Vector2f c, double w, double h) {
-		Center.x = c.x;
-		Center.y = c.y;
+	Box(sf::Vector2f* c, double w, double h) {
+		Center.x = c->x;
+		Center.y = c->y;
 
 		width = w;
 		height = h;
 	}
 	
-	bool intersects(Box const &otherBox){
+	bool intersects(Box* const otherBox){
 		if (
-			Center.x < otherBox.Center.x + otherBox.width &&
-			Center.x + width > otherBox.Center.x &&
-			Center.y < otherBox.Center.y + otherBox.height &&
-			height + Center.y > otherBox.Center.y
+			Center.x < otherBox->Center.x + otherBox->width &&
+			Center.x + width > otherBox->Center.x &&
+			Center.y < otherBox->Center.y + otherBox->height &&
+			height + Center.y > otherBox->Center.y
 			) {
 			return true;
 		}
@@ -29,7 +29,7 @@ public:
 		}
 	}
 
-	bool pointInBox(sf::Vector2f point) {
+	bool pointInBox(sf::Vector2f* point) {
 		double leftX = Center.x - width / 2;
 		double rightX = Center.x + width / 2;
 
@@ -37,8 +37,8 @@ public:
 		double bottomY = Center.y - height / 2;
 
 		if (
-			leftX <= point.x && point.x <= rightX &&
-			bottomY <= point.y && point.y <= topY
+			leftX <= point->x && point->x <= rightX &&
+			bottomY <= point->y && point->y <= topY
 		) {
 			return true;
 		}

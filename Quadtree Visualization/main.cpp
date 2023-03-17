@@ -13,18 +13,26 @@ int main()
     sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
     Box box = Box(&Center1, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    Quadtree qt = Quadtree(1, box);
+    Quadtree qt = Quadtree(5, box);
 
     sf::Vector2f Point1(10, 10);
     sf::Vector2f Point2(450, 450);
     sf::Vector2f Point3(300, 300);
 
-    qt.insert(&Point1);
-    qt.insert(&Point2);
-    qt.insert(&Point3);
-
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH+20, SCREEN_HEIGHT+20), "QuadTree Visualizer");
     window.setFramerateLimit(60);
+
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf"))
+    {
+        // handle error
+    }
+
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(0, 0);
 
     while (window.isOpen()) {
         sf::Event event;
@@ -43,6 +51,9 @@ int main()
 
         //Draw everything in the Window
         qt.render(window);
+
+        text.setString("Points: " + std::to_string(qt.getSize()));
+        window.draw(text);
 
         //Show Window
         window.display();

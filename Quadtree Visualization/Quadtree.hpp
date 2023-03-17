@@ -1,12 +1,19 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 class Quadtree {
 public:
     Quadtree(int _maxSize, const Box& _box) : box(_box){
         maxSize = _maxSize;
         divided = false;
+    }
+
+    Quadtree(int _maxSize, int _depth,const Box& _box) : box(_box) {
+        maxSize = _maxSize;
+        divided = false;
+        depth = _depth;
     }
 
     bool insert(sf::Vector2f* point) {
@@ -46,10 +53,10 @@ public:
         Box boxBottomLeft(&newBottomleft, newWidth, newHeigth);
         Box boxBottomRight(&newBottmRight, newWidth, newHeigth);
 
-        topLeft = std::make_unique<Quadtree>(maxSize, boxTopLeft);
-        topRight = std::make_unique<Quadtree>(maxSize, boxTopRight);
-        bottomLeft = std::make_unique<Quadtree>(maxSize, boxBottomLeft);
-        bottomRight = std::make_unique<Quadtree>(maxSize, boxBottomRight);
+        topLeft = std::make_unique<Quadtree>(maxSize, depth + 1, boxTopLeft);
+        topRight = std::make_unique<Quadtree>(maxSize, depth + 1, boxTopRight);
+        bottomLeft = std::make_unique<Quadtree>(maxSize, depth + 1, boxBottomLeft);
+        bottomRight = std::make_unique<Quadtree>(maxSize, depth + 1, boxBottomRight);
 
         for (sf::Vector2f* p : points) {
             insert(p);
@@ -61,10 +68,14 @@ public:
 
     void render(sf::RenderWindow& window) {
         sf::RectangleShape square(sf::Vector2f(box.getWidth(), box.getHeigth()));
-        square.setOutlineThickness(5);
-        square.setOutlineColor(sf::Color::Red);
+
+        square.setOutlineThickness(std::max(5-2*depth,1));
+
+        if (depth == 0) square.setOutlineColor(sf::Color::Red);
+        else square.setOutlineColor(sf::Color::Green);
+        
         square.setFillColor(sf::Color::Transparent);
-        square.setPosition(box.getCenter().x - box.getWidth()/2 + 10, box.getCenter().y - box.getHeigth() / 2 + 10);
+        square.setPosition(box.getCenter().x - box.getWidth()/2 +10, box.getCenter().y - box.getHeigth() / 2 +10);
 
         window.draw(square);
 
@@ -78,19 +89,33 @@ public:
             for (sf::Vector2f* p: points) {
                 sf::CircleShape circle(5.f);
                 circle.setFillColor(sf::Color::White);
+                circle.setRadius(2);
                 circle.setPosition(p->x, p->y);
                 window.draw(circle);
             }
         }
     }
 
+    int getSize() {
+        if (divided) {
+            return topLeft->getSize() + topRight->getSize() + bottomLeft->getSize() + bottomRight->getSize();
+        }
+        else {
+            return getPoints().size();
+        }
+    }
+
 	std::vector<sf::Vector2f*> getPoints() { return points; }
 
 private:
-	std::vector<sf::Vector2f*> points;
-	Box box;
 	int maxSize;
+    int depth = 0;
+
 	bool divided;
+
+    Box box;
+
+    std::vector<sf::Vector2f*> points;
     std::unique_ptr<Quadtree> topLeft;
     std::unique_ptr<Quadtree> topRight;
     std::unique_ptr<Quadtree> bottomLeft;

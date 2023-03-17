@@ -75,7 +75,7 @@ public:
         else square.setOutlineColor(sf::Color::Green);
         
         square.setFillColor(sf::Color::Transparent);
-        square.setPosition(box.getCenter().x - box.getWidth()/2 +10, box.getCenter().y - box.getHeigth() / 2 +10);
+        square.setPosition(box.getCenter().x - box.getWidth()/2, box.getCenter().y - box.getHeigth() / 2);
 
         window.draw(square);
 
@@ -105,8 +105,35 @@ public:
         }
     }
 
-	std::vector<sf::Vector2f*> getPoints() { return points; }
+    std::vector<sf::Vector2f*> getPointsInBox(Box* queryBox) {
+        std::vector<sf::Vector2f*> pointsInBox;
 
+        if (!box.intersects(queryBox)) return pointsInBox;
+
+        if (divided) {
+            std::vector<sf::Vector2f*> childPointsTopLeft = topLeft->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), childPointsTopLeft.begin(), childPointsTopLeft.end());
+
+            std::vector<sf::Vector2f*> childPointsTopRight = topRight->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), childPointsTopRight.begin(), childPointsTopRight.end());
+
+            std::vector<sf::Vector2f*> childPointsBottomLeft = bottomLeft->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), childPointsBottomLeft.begin(), childPointsBottomLeft.end());
+
+            std::vector<sf::Vector2f*> childPointsBottomRight = bottomRight->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), childPointsBottomRight.begin(), childPointsBottomRight.end());
+        }
+        else {
+            for (sf::Vector2f* p : points) {
+                if (queryBox->pointInBox(p)) {
+                    pointsInBox.push_back(p);
+                }
+            }
+        }
+        return pointsInBox;
+    }
+
+	std::vector<sf::Vector2f*> getPoints() { return points; }
 private:
 	int maxSize;
     int depth = 0;

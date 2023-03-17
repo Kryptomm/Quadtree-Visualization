@@ -23,7 +23,7 @@ int main()
     qt.insert(&Point2);
     qt.insert(&Point3);
 
-    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH+15, SCREEN_HEIGHT+15), "QuadTree Visualizer");
+    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH+20, SCREEN_HEIGHT+20), "QuadTree Visualizer");
     window.setFramerateLimit(60);
 
     while (window.isOpen()) {
@@ -31,6 +31,11 @@ int main()
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) window.close();
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) window.close();
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                sf::Vector2f newPoint(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
+                qt.insert(new sf::Vector2f(newPoint));
+            }
         }
 
         //clear the current Window

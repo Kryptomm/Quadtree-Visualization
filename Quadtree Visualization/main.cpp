@@ -10,8 +10,20 @@ const int SCREEN_HEIGHT = 1000;
 
 int main()
 {
-    /*
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "Title");
+    sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+    Box box = Box(&Center1, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    Quadtree qt = Quadtree(1, box);
+
+    sf::Vector2f Point1(10, 10);
+    sf::Vector2f Point2(450, 450);
+    sf::Vector2f Point3(300, 300);
+
+    qt.insert(&Point1);
+    qt.insert(&Point2);
+    qt.insert(&Point3);
+
+    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH+15, SCREEN_HEIGHT+15), "QuadTree Visualizer");
     window.setFramerateLimit(60);
 
     while (window.isOpen()) {
@@ -25,29 +37,11 @@ int main()
         window.clear();
 
         //Draw everything in the Window
+        qt.render(window);
 
         //Show Window
         window.display();
     }
-    */
-
-    sf::Vector2f Center1(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
-    Box box1 = Box(&Center1, SCREEN_WIDTH, SCREEN_HEIGHT);
-    
-    Quadtree qt = Quadtree(1, box1);
-
-    sf::Vector2f Point1(50,50);
-    sf::Vector2f Point2(750, 750);
-
-    qt.insert(&Point1);
-    qt.insert(&Point2);
-
-    std::unique_ptr<Quadtree> topLeft = qt.getTopLeft();
-    std::unique_ptr<Quadtree> bottomLeft = qt.getBottomLeft();
-    for (auto element : (*bottomLeft).getPoints()) {
-        std::cout << element->x << ";" << element->y << " ";
-    }
-    std::cout << std::endl;
 
     return 0;
 }

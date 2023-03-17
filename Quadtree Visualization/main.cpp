@@ -1,7 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
 #include "Box.hpp"
 #include "Quadtree.hpp"
+#include<cstdlib>
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
@@ -29,20 +31,24 @@ int main()
     }
     */
 
-    sf::Vector2f Center1(0,0);
-
-    Box box1 = Box(&Center1, 2, 2);
-    std::cout << box1 << std::endl;
+    sf::Vector2f Center1(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+    Box box1 = Box(&Center1, SCREEN_WIDTH, SCREEN_HEIGHT);
     
-    sf::Vector2f Center2(2,2);
+    Quadtree qt = Quadtree(1, box1);
 
-    Box box2 = Box(&Center2, 2, 2);
-    std::cout << box2 << std::endl;
+    sf::Vector2f Point1(50,50);
+    sf::Vector2f Point2(750, 750);
 
-    sf::Vector2f Point(-5, -5);
+    qt.insert(&Point1);
+    qt.insert(&Point2);
 
-    std::cout << box1.intersects(&box2) << std::endl;
-    std::cout << box1.pointInBox(&Point) << std::endl;
+    std::unique_ptr<Quadtree> topLeft = qt.getTopLeft();
+    std::unique_ptr<Quadtree> bottomLeft = qt.getBottomLeft();
+    for (auto element : (*bottomLeft).getPoints()) {
+        std::cout << element->x << ";" << element->y << " ";
+    }
+    std::cout << std::endl;
+
     return 0;
 }
 

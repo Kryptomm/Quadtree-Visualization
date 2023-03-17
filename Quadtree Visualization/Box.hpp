@@ -2,18 +2,7 @@
 
 class Box {
 public:
-	sf::Vector2f Center;
-
-	double width;
-	double height;
-
-	Box(sf::Vector2f* c, double w, double h) {
-		Center.x = c->x;
-		Center.y = c->y;
-
-		width = w;
-		height = h;
-	}
+	Box(sf::Vector2f* c, double w, double h) : Center(*c), width(w), height(h) {}
 	
 	bool intersects(Box* const otherBox){
 		if (
@@ -46,10 +35,20 @@ public:
 			return false;
 		}
 	}
+	sf::Vector2f getCenter() const { return Center; }
+	double getWidth() const { return width; }
+	double getHeigth() const { return height; }
+
+private:
+	sf::Vector2f Center;
+
+	double width;
+	double height;
+
 };
 
 std::ostream& operator<<(std::ostream& s, const Box& box) {
-	return s << "Center: (" + std::to_string(box.Center.x) + "," + std::to_string(box.Center.y) + ")" + "\n"
-			  + "Width: " + std::to_string(box.width) + "\n"
-	          + "Height: " + std::to_string(box.height) + "\n";
+	return s << "Center: (" + std::to_string(box.getCenter().x) + "," + std::to_string(box.getCenter().y) + ")" + "\n"
+			  + "Width: " + std::to_string(box.getWidth()) + "\n"
+	          + "Height: " + std::to_string(box.getHeigth()) + "\n";
 }

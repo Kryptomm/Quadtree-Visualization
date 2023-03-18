@@ -55,8 +55,8 @@ public:
 private:
 	sf::Vector2f center;
 
-	int width;
-	int height;
+	double width;
+	double height;
 };
 
 std::ostream& operator<<(std::ostream& s, const Box& box) {

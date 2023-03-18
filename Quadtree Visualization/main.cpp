@@ -9,8 +9,8 @@
 
 
 const int SCREEN_WIDTH = 1000;
-const int SCREEN_HEIGHT = 1000;
-const int BRUSH_SIZE = 1;
+const int SCREEN_HEIGHT = 500;
+const int BRUSH_SIZE = 1000;
 
 //Define the Size of the Quadtree
 sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -124,17 +124,17 @@ int main()
             int upperBound = box->getUpperBound();
             int lowerBound = box->getLowerBound();
 
-            lines[4 * i + 0] = sf::Vertex(sf::Vector2f(leftBound,upperBound), lineColor);
-            lines[4 * i + 1] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
+            lines[8 * i + 0] = sf::Vertex(sf::Vector2f(leftBound,upperBound), lineColor);
+            lines[8 * i + 1] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
+        
+            lines[8 * i + 2] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
+            lines[8 * i + 3] = sf::Vertex(sf::Vector2f(rightBound, lowerBound), lineColor);
 
-            lines[4 * i + 2] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
-            lines[4 * i + 3] = sf::Vertex(sf::Vector2f(rightBound, lowerBound), lineColor);
+            lines[8 * i + 4] = sf::Vertex(sf::Vector2f(rightBound, lowerBound), lineColor);
+            lines[8 * i + 5] = sf::Vertex(sf::Vector2f(leftBound, lowerBound), lineColor);
 
-            lines[4 * i + 4] = sf::Vertex(sf::Vector2f(rightBound, lowerBound), lineColor);
-            lines[4 * i + 5] = sf::Vertex(sf::Vector2f(leftBound, lowerBound), lineColor);
-
-            lines[4 * i + 6] = sf::Vertex(sf::Vector2f(leftBound, lowerBound), lineColor);
-            lines[4 * i + 7] = sf::Vertex(sf::Vector2f(leftBound, upperBound), lineColor);
+            lines[8 * i + 6] = sf::Vertex(sf::Vector2f(leftBound, lowerBound), lineColor);
+            lines[8 * i + 7] = sf::Vertex(sf::Vector2f(leftBound, upperBound), lineColor);
         }
 
         window.draw(lines);
@@ -146,7 +146,7 @@ int main()
             sf::Color color(sf::Color::White);
             sf::Vertex vertex(sf::Vector2f(points[i]->getPosX(), points[i]->getPosY()), color);
             vertices.append(vertex);
-            for (int j = 0; j <= 360; j += 10) {
+            for (int j = 0; j <= 360; j += 40) {
                 float angle = static_cast<float>(j) * 3.14159f / 180.f;
                 float px = points[i]->getPosX() + std::cos(angle) * radius;
                 float py = points[i]->getPosY() + std::sin(angle) * radius;

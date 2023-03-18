@@ -59,9 +59,9 @@ public:
         if (!box.pointInBox(&pos)) return false;
         if (divided) {
             if (topLeft->insert(point)) return true;
-            if (topRight->insert(point)) return true;
-            if (bottomLeft->insert(point)) return true;
-            if (bottomRight->insert(point)) return true;
+            else if (topRight->insert(point)) return true;
+            else if (bottomLeft->insert(point)) return true;
+            else if (bottomRight->insert(point)) return true;
             return false;
         }
 
@@ -120,11 +120,6 @@ public:
             topRight->render(window);
             bottomLeft->render(window);
             bottomRight->render(window);
-        }
-        else {
-            for (const auto& p : getPoints()) {
-                p->render(window);
-            }
         }
     }
 

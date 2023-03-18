@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <thread>
 #include "Box.hpp"
 #include "Quadtree.hpp"
 
@@ -10,12 +11,18 @@ const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const int BRUSH_SIZE = 10;
 
+//Define the Size of the Quadtree
+sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+Box box = Box(&Center1, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+void updatePoints(std::vector<Point*> points, int start, int end) {
+    for (int i = start; i < end; ++i) {
+        points[i]->updatePos(&box);
+    }
+}
+
 int main()
 {
-    //Define the Size of the Quadtree
-    sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-    Box box = Box(&Center1, SCREEN_WIDTH, SCREEN_HEIGHT);
-
     //Window Settings
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "QuadTree Visualizer");
     window.setFramerateLimit(60);
@@ -50,6 +57,11 @@ int main()
 
     points.push_back(queryPoint);
 
+    Quadtree qt = Quadtree(10, box);
+    for (const auto& point : points) {
+        qt.insert(point);
+    }
+
     //Window Loop
     while (window.isOpen()) {
         sf::Event event;
@@ -73,12 +85,24 @@ int main()
         }
 
         //Update all Positions of the Points based on their Velocity.
-        for (auto& point : points) {
-            point->updatePos(&box);
+        //Settings for updating Positions
+        const int batch_size = 100;
+        const int num_batches = (points.size() + batch_size - 1) / batch_size;
+
+        std::vector<std::thread> threads;
+        for (int i = 0; i < num_batches; ++i) {
+            int start = i * batch_size;
+            int end = std::min(start + batch_size, static_cast<int>(points.size()) - 1);
+            threads.push_back(std::thread(updatePoints, std::ref(points), start, end));
         }
+        
+        for (auto& thread : threads) {
+            thread.join();
+        }
+        
 
         //Create a new Quadtree based on the new Positions of the points.
-        Quadtree qt = Quadtree(10, box);
+        qt = Quadtree(10, box);
         for (const auto& point : points) {
             qt.insert(point);
         }
@@ -88,6 +112,16 @@ int main()
 
         //Draw everything in the Window
         qt.render(window);
+
+        //Draw Points
+        sf::VertexArray vertices(sf::Points);
+        float radius = 2;
+        for (int i = 0; i < points.size(); i++) {
+            sf::Color color(sf::Color::White);
+            sf::Vertex vertex(sf::Vector2f(points[i]->getPosX(), points[i]->getPosY()), color);
+            vertices.append(vertex);
+        }
+        window.draw(vertices);
 
         //Draw Querybox
         sf::Vector2f queryBox(200, 200);
@@ -114,7 +148,7 @@ int main()
         }
 
         //Draw Text
-        text.setString("Points: " + std::to_string(qt.getSize()));
+        text.setString("Points: " + std::to_string(points.size()));
         window.draw(text);
 
         //Show Window
@@ -126,6 +160,7 @@ int main()
             frame_count = 0;
             clock.restart();
         }
+
     }
 
     //Free Memory of the Points

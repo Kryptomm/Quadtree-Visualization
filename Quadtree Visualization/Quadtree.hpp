@@ -7,14 +7,6 @@ class Point {
 public:
     Point(double xp, double yp, double xv, double yv) : x_pos(xp), y_pos(yp), x_vel(xv), y_vel(yv) {}
 
-    void render(sf::RenderWindow& window) {
-        sf::CircleShape circle(5.f);
-        circle.setFillColor(sf::Color::White);
-        circle.setRadius(2);
-        circle.setPosition(x_pos, y_pos);
-        window.draw(circle);
-    }
-
     void updatePos(Box* box) {
         x_pos += x_vel;
         y_pos += y_vel;
@@ -27,6 +19,14 @@ public:
             y_vel *= -1;
             y_pos += y_vel;
         }
+    }
+
+    void render(sf::RenderWindow& window) {
+        sf::CircleShape circle(5.f);
+        circle.setFillColor(sf::Color::White);
+        circle.setRadius(2);
+        circle.setPosition(x_pos, y_pos);
+        window.draw(circle);
     }
 
     double getPosX() const { return x_pos; }
@@ -109,10 +109,7 @@ public:
         sf::RectangleShape square(sf::Vector2f(box.getWidth(), box.getHeigth()));
 
         square.setOutlineThickness(std::max(5 - 2 * depth, 1));
-
-        if (depth == 0) square.setOutlineColor(sf::Color::Red);
-        else square.setOutlineColor(sf::Color::Green);
-
+        square.setOutlineColor(sf::Color::Green);
         square.setFillColor(sf::Color::Transparent);
         square.setPosition(box.getCenter().x - box.getWidth() / 2, box.getCenter().y - box.getHeigth() / 2);
 

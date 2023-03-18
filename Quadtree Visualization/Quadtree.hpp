@@ -3,21 +3,38 @@
 #include <memory>
 #include <algorithm>
 
+class Point {
+public:
+    Point(double xp, double yp, double xv, double yv) : x_pos(xp), y_pos(yp), x_vel(xv), y_vel(yv) {}
+
+    double getPosX() const { return x_pos; }
+    double getPosY() const { return y_pos; }
+    double getVelX() const { return x_vel; }
+    double getvelY() const { return y_vel; }
+
+    sf::Vector2f getPos() { return sf::Vector2f(x_pos, y_pos); }
+    sf::Vector2f getVel() { return sf::Vector2f(x_vel, y_vel); }
+
+private:
+    double x_pos, y_pos, x_vel, y_vel;
+};
+
 class Quadtree {
 public:
-    Quadtree(int _maxSize, const Box& _box) : box(_box){
+    Quadtree(int _maxSize, const Box& _box) : box(_box) {
         maxSize = _maxSize;
         divided = false;
     }
 
-    Quadtree(int _maxSize, int _depth,const Box& _box) : box(_box) {
+    Quadtree(int _maxSize, int _depth, const Box& _box) : box(_box) {
         maxSize = _maxSize;
         divided = false;
         depth = _depth;
     }
 
-    bool insert(sf::Vector2f* point) {
-        if (!box.pointInBox(point)) return false;
+    bool insert(Point* point) {
+        sf::Vector2f pos = point->getPos();
+        if (!box.pointInBox(&pos)) return false;
         if (divided) {
             if (topLeft->insert(point)) return true;
             if (topRight->insert(point)) return true;
@@ -58,7 +75,7 @@ public:
         bottomLeft = std::make_unique<Quadtree>(maxSize, depth + 1, boxBottomLeft);
         bottomRight = std::make_unique<Quadtree>(maxSize, depth + 1, boxBottomRight);
 
-        for (sf::Vector2f* p : points) {
+        for (const auto& p : getPoints()) {
             insert(p);
         }
 
@@ -69,13 +86,13 @@ public:
     void render(sf::RenderWindow& window) {
         sf::RectangleShape square(sf::Vector2f(box.getWidth(), box.getHeigth()));
 
-        square.setOutlineThickness(std::max(5-2*depth,1));
+        square.setOutlineThickness(std::max(5 - 2 * depth, 1));
 
         if (depth == 0) square.setOutlineColor(sf::Color::Red);
         else square.setOutlineColor(sf::Color::Green);
-        
+
         square.setFillColor(sf::Color::Transparent);
-        square.setPosition(box.getCenter().x - box.getWidth()/2, box.getCenter().y - box.getHeigth() / 2);
+        square.setPosition(box.getCenter().x - box.getWidth() / 2, box.getCenter().y - box.getHeigth() / 2);
 
         window.draw(square);
 
@@ -86,11 +103,13 @@ public:
             bottomRight->render(window);
         }
         else {
-            for (sf::Vector2f* p: points) {
+            for (const auto& p : getPoints()) {
+                sf::Vector2f pos = p->getPos();
+
                 sf::CircleShape circle(5.f);
                 circle.setFillColor(sf::Color::White);
                 circle.setRadius(2);
-                circle.setPosition(p->x, p->y);
+                circle.setPosition(pos.x, pos.y);
                 window.draw(circle);
             }
         }
@@ -105,27 +124,28 @@ public:
         }
     }
 
-    std::vector<sf::Vector2f*> getPointsInBox(Box* queryBox) {
-        std::vector<sf::Vector2f*> pointsInBox;
+    std::vector<Point*> getPointsInBox(Box* queryBox) {
+        std::vector<Point*> pointsInBox;
 
         if (!box.intersects(queryBox)) return pointsInBox;
 
         if (divided) {
-            std::vector<sf::Vector2f*> childPointsTopLeft = topLeft->getPointsInBox(queryBox);
+            std::vector<Point*> childPointsTopLeft = topLeft->getPointsInBox(queryBox);
             pointsInBox.insert(pointsInBox.end(), childPointsTopLeft.begin(), childPointsTopLeft.end());
 
-            std::vector<sf::Vector2f*> childPointsTopRight = topRight->getPointsInBox(queryBox);
+            std::vector<Point*> childPointsTopRight = topRight->getPointsInBox(queryBox);
             pointsInBox.insert(pointsInBox.end(), childPointsTopRight.begin(), childPointsTopRight.end());
 
-            std::vector<sf::Vector2f*> childPointsBottomLeft = bottomLeft->getPointsInBox(queryBox);
+            std::vector<Point*> childPointsBottomLeft = bottomLeft->getPointsInBox(queryBox);
             pointsInBox.insert(pointsInBox.end(), childPointsBottomLeft.begin(), childPointsBottomLeft.end());
 
-            std::vector<sf::Vector2f*> childPointsBottomRight = bottomRight->getPointsInBox(queryBox);
+            std::vector<Point*> childPointsBottomRight = bottomRight->getPointsInBox(queryBox);
             pointsInBox.insert(pointsInBox.end(), childPointsBottomRight.begin(), childPointsBottomRight.end());
         }
         else {
-            for (sf::Vector2f* p : points) {
-                if (queryBox->pointInBox(p)) {
+            for (const auto& p : points) {
+                sf::Vector2f pos = p->getPos();
+                if (queryBox->pointInBox(&pos)) {
                     pointsInBox.push_back(p);
                 }
             }
@@ -133,16 +153,17 @@ public:
         return pointsInBox;
     }
 
-	std::vector<sf::Vector2f*> getPoints() { return points; }
+    std::vector<Point*> getPoints() { return points; }
+
 private:
-	int maxSize;
+    int maxSize;
     int depth = 0;
 
-	bool divided;
+    bool divided;
 
     Box box;
 
-    std::vector<sf::Vector2f*> points;
+    std::vector<Point*> points;
     std::unique_ptr<Quadtree> topLeft;
     std::unique_ptr<Quadtree> topRight;
     std::unique_ptr<Quadtree> bottomLeft;

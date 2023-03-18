@@ -47,7 +47,7 @@ public:
 	sf::Vector2f getCenter() const { return center; }
 	double getWidth() const { return width; }
 	double getHeigth() const { return height; }
-	double getReightBound() const { return center.x + width / 2; }
+	double getRightBound() const { return center.x + width / 2; }
 	double getLeftBound() const { return center.x - width / 2; }
 	double getUpperBound() const { return center.y - height / 2; }
 	double getLowerBound() const { return center.y + height / 2; }
@@ -55,9 +55,8 @@ public:
 private:
 	sf::Vector2f center;
 
-	double width;
-	double height;
-
+	int width;
+	int height;
 };
 
 std::ostream& operator<<(std::ostream& s, const Box& box) {

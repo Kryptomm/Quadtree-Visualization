@@ -3,13 +3,14 @@
 #include <vector>
 #include <cstdlib>
 #include <thread>
+#include <chrono>
 #include "Box.hpp"
 #include "Quadtree.hpp"
 
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const int BRUSH_SIZE = 10;
+const int BRUSH_SIZE = 1;
 
 //Define the Size of the Quadtree
 sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -57,10 +58,13 @@ int main()
 
     points.push_back(queryPoint);
 
-    Quadtree qt = Quadtree(10, box);
+    Quadtree qt = Quadtree(1, box);
     for (const auto& point : points) {
         qt.insert(point);
     }
+    
+    //Calculation Settings
+    const int batch_size = 100;
 
     //Window Loop
     while (window.isOpen()) {
@@ -69,7 +73,7 @@ int main()
             if (event.type == sf::Event::Closed) window.close();
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) window.close();
 
-            //Create a new Point on click
+            //Create a new Points on click
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 for (int i = 0; i < BRUSH_SIZE; i++) {
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
@@ -86,11 +90,10 @@ int main()
 
         //Update all Positions of the Points based on their Velocity.
         //Settings for updating Positions
-        const int batch_size = 100;
         const int num_batches = (points.size() + batch_size - 1) / batch_size;
 
         std::vector<std::thread> threads;
-        for (int i = 0; i < num_batches; ++i) {
+        for (int i = 0; i < num_batches; i++) {
             int start = i * batch_size;
             int end = std::min(start + batch_size, static_cast<int>(points.size()) - 1);
             threads.push_back(std::thread(updatePoints, std::ref(points), start, end));
@@ -99,10 +102,9 @@ int main()
         for (auto& thread : threads) {
             thread.join();
         }
-        
 
         //Create a new Quadtree based on the new Positions of the points.
-        qt = Quadtree(10, box);
+        qt = Quadtree(1, box);
         for (const auto& point : points) {
             qt.insert(point);
         }
@@ -111,15 +113,45 @@ int main()
         window.clear();
 
         //Draw everything in the Window
-        qt.render(window);
+        std::vector<Box*> boxes = qt.getBoxes();
+        sf::VertexArray lines(sf::Lines, boxes.size() * 8);
+
+        sf::Color lineColor(0,255,0);
+        for (int i = 0; i < boxes.size(); i++) {
+            Box* box = boxes[i];
+            int leftBound = box->getLeftBound();
+            int rightBound = box->getRightBound();
+            int upperBound = box->getUpperBound();
+            int lowerBound = box->getLowerBound();
+
+            lines[4 * i + 0] = sf::Vertex(sf::Vector2f(leftBound,upperBound), lineColor);
+            lines[4 * i + 1] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
+
+            lines[4 * i + 2] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
+            lines[4 * i + 3] = sf::Vertex(sf::Vector2f(rightBound, lowerBound), lineColor);
+
+            lines[4 * i + 4] = sf::Vertex(sf::Vector2f(rightBound, lowerBound), lineColor);
+            lines[4 * i + 5] = sf::Vertex(sf::Vector2f(leftBound, lowerBound), lineColor);
+
+            lines[4 * i + 6] = sf::Vertex(sf::Vector2f(leftBound, lowerBound), lineColor);
+            lines[4 * i + 7] = sf::Vertex(sf::Vector2f(leftBound, upperBound), lineColor);
+        }
+
+        window.draw(lines);
 
         //Draw Points
         sf::VertexArray vertices(sf::Points);
-        float radius = 2;
+        float radius = 3;
         for (int i = 0; i < points.size(); i++) {
             sf::Color color(sf::Color::White);
             sf::Vertex vertex(sf::Vector2f(points[i]->getPosX(), points[i]->getPosY()), color);
             vertices.append(vertex);
+            for (int j = 0; j <= 360; j += 10) {
+                float angle = static_cast<float>(j) * 3.14159f / 180.f;
+                float px = points[i]->getPosX() + std::cos(angle) * radius;
+                float py = points[i]->getPosY() + std::sin(angle) * radius;
+                vertices.append(sf::Vertex(sf::Vector2f(px, py), color));
+            }
         }
         window.draw(vertices);
 
@@ -136,16 +168,21 @@ int main()
         std::vector<Point*> pointsInBox;
         sf::Vector2f queryCenter(queryPoint->getPosX(), queryPoint->getPosY());
         Box queryBox2(&queryCenter, 200,200);
-
         pointsInBox = qt.getPointsInBox(&queryBox2);
 
-        for (auto& point : pointsInBox) {
-            sf::CircleShape circle(5.f);
-            circle.setFillColor(sf::Color::Red);
-            circle.setRadius(2);
-            circle.setPosition(point->getPosX(), point->getPosY());
-            window.draw(circle);
+        sf::VertexArray verticesInBox(sf::Points);
+        for (int i = 0; i < pointsInBox.size(); i++) {
+            sf::Color color(sf::Color::Red);
+            sf::Vertex vertex(sf::Vector2f(pointsInBox[i]->getPosX(), pointsInBox[i]->getPosY()), color);
+            vertices.append(vertex);
+            for (int j = 0; j <= 360; j += 10) {
+                float angle = static_cast<float>(j) * 3.14159f / 180.f;
+                float px = pointsInBox[i]->getPosX() + std::cos(angle) * radius;
+                float py = pointsInBox[i]->getPosY() + std::sin(angle) * radius;
+                verticesInBox.append(sf::Vertex(sf::Vector2f(px, py), color));
+            }
         }
+        window.draw(verticesInBox);
 
         //Draw Text
         text.setString("Points: " + std::to_string(points.size()));

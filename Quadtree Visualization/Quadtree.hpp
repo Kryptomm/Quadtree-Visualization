@@ -11,7 +11,7 @@ public:
         x_pos += x_vel;
         y_pos += y_vel;
 
-        if (x_pos >= box->getReightBound() || x_pos <= box->getLeftBound()) {
+        if (x_pos >= box->getRightBound() || x_pos <= box->getLeftBound()) {
             x_vel *= -1;
             x_pos += x_vel;
         }
@@ -138,17 +138,19 @@ public:
         if (!box.intersects(queryBox)) return pointsInBox;
 
         if (divided) {
-            std::vector<Point*> childPointsTopLeft = topLeft->getPointsInBox(queryBox);
-            pointsInBox.insert(pointsInBox.end(), childPointsTopLeft.begin(), childPointsTopLeft.end());
+            std::vector<Point*> children;
 
-            std::vector<Point*> childPointsTopRight = topRight->getPointsInBox(queryBox);
-            pointsInBox.insert(pointsInBox.end(), childPointsTopRight.begin(), childPointsTopRight.end());
+            children = topLeft->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), children.begin(), children.end());
 
-            std::vector<Point*> childPointsBottomLeft = bottomLeft->getPointsInBox(queryBox);
-            pointsInBox.insert(pointsInBox.end(), childPointsBottomLeft.begin(), childPointsBottomLeft.end());
+            children = topRight->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), children.begin(), children.end());
 
-            std::vector<Point*> childPointsBottomRight = bottomRight->getPointsInBox(queryBox);
-            pointsInBox.insert(pointsInBox.end(), childPointsBottomRight.begin(), childPointsBottomRight.end());
+            children = bottomLeft->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), children.begin(), children.end());
+
+            children = bottomRight->getPointsInBox(queryBox);
+            pointsInBox.insert(pointsInBox.end(), children.begin(), children.end());
         }
         else {
             for (const auto& p : points) {
@@ -159,6 +161,29 @@ public:
             }
         }
         return pointsInBox;
+    }
+
+    std::vector<Box*> getBoxes() {
+        std::vector<Box*> boxes;
+
+        boxes.push_back(&box);
+
+        if (!divided) return boxes;
+
+        std::vector<Box*> children;
+        children = topLeft->getBoxes();
+        boxes.insert(boxes.end(), children.begin(), children.end());
+
+        children = topRight->getBoxes();
+        boxes.insert(boxes.end(), children.begin(), children.end());
+
+        children = bottomLeft->getBoxes();
+        boxes.insert(boxes.end(), children.begin(), children.end());
+
+        children = bottomRight->getBoxes();
+        boxes.insert(boxes.end(), children.begin(), children.end());
+
+        return boxes;
     }
 
     std::vector<Point*> getPoints() { return points; }

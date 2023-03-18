@@ -7,6 +7,28 @@ class Point {
 public:
     Point(double xp, double yp, double xv, double yv) : x_pos(xp), y_pos(yp), x_vel(xv), y_vel(yv) {}
 
+    void render(sf::RenderWindow& window) {
+        sf::CircleShape circle(5.f);
+        circle.setFillColor(sf::Color::White);
+        circle.setRadius(2);
+        circle.setPosition(x_pos, y_pos);
+        window.draw(circle);
+    }
+
+    void updatePos(Box* box) {
+        x_pos += x_vel;
+        y_pos += y_vel;
+
+        if (x_pos >= box->getReightBound() || x_pos <= box->getLeftBound()) {
+            x_vel *= -1;
+            x_pos += x_vel;
+        }
+        if (y_pos >= box->getLowerBound() || y_pos <= box->getUpperBound()) {
+            y_vel *= -1;
+            y_pos += y_vel;
+        }
+    }
+
     double getPosX() const { return x_pos; }
     double getPosY() const { return y_pos; }
     double getVelX() const { return x_vel; }
@@ -104,13 +126,7 @@ public:
         }
         else {
             for (const auto& p : getPoints()) {
-                sf::Vector2f pos = p->getPos();
-
-                sf::CircleShape circle(5.f);
-                circle.setFillColor(sf::Color::White);
-                circle.setRadius(2);
-                circle.setPosition(pos.x, pos.y);
-                window.draw(circle);
+                p->render(window);
             }
         }
     }

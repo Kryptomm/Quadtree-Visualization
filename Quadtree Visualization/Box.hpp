@@ -43,9 +43,14 @@ public:
 			return false;
 		}
 	}
+
 	sf::Vector2f getCenter() const { return center; }
 	double getWidth() const { return width; }
 	double getHeigth() const { return height; }
+	double getReightBound() const { return center.x + width / 2; }
+	double getLeftBound() const { return center.x - width / 2; }
+	double getUpperBound() const { return center.y - height / 2; }
+	double getLowerBound() const { return center.y + height / 2; }
 
 private:
 	sf::Vector2f center;

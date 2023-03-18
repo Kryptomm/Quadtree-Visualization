@@ -14,8 +14,6 @@ int main()
     sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
     Box box = Box(&Center1, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    Quadtree qt = Quadtree(5, box);
-
     sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "QuadTree Visualizer");
     window.setFramerateLimit(60);
 
@@ -41,13 +39,23 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
                 sf::Vector2f newPointPos(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
-                sf::Vector2f newPointVel(0, 0);
 
-                Point* newPoint = new Point(newPointPos.x, newPointPos.y, 0, 0);
+                float random_velx = (float)rand() / RAND_MAX * 4.0f - 2;
+                float random_vely = (float)rand() / RAND_MAX * 4.0f - 2;
+
+                Point* newPoint = new Point(newPointPos.x, newPointPos.y, random_velx, random_vely);
 
                 points.push_back(newPoint);
-                qt.insert(newPoint);
             }
+        }
+
+        for (auto& point : points) {
+            point->updatePos(&box);
+        }
+
+        Quadtree qt = Quadtree(1, box);
+        for (const auto& point : points) {
+            qt.insert(point);
         }
 
         //clear the current Window
@@ -56,7 +64,7 @@ int main()
         //Draw everything in the Window
         qt.render(window);
 
-        //text.setString("Points: " + std::to_string(qt.getSize()));
+        text.setString("Points: " + std::to_string(qt.getSize()));
         window.draw(text);
 
         //Show Window

@@ -5,7 +5,7 @@
 
 class Point {
 public:
-    Point(double xp, double yp, double xv, double yv) : x_pos(xp), y_pos(yp), x_vel(xv), y_vel(yv) {}
+    Point(double xp, double yp, double xv, double yv, double r) : x_pos(xp), y_pos(yp), x_vel(xv), y_vel(yv), radius(r) {}
 
     void updatePos(Box* box) {
         x_pos += x_vel;
@@ -21,6 +21,15 @@ public:
         }
     }
 
+    double getDistanceBetweenPoint(Point* other) {
+        return sqrt((getPosX() - other->getPosX()) * (getPosX() - other->getPosX()) + (getPosY() - other->getPosY()) * (getPosY() - other->getPosY()));
+    }
+
+    bool isCollidingWithPoint(Point* other) {
+        double distance = getDistanceBetweenPoint(other);
+        return (distance <= getRadius() + other->getRadius());
+    }
+
     void render(sf::RenderWindow& window) {
         sf::CircleShape circle(5.f);
         circle.setFillColor(sf::Color::White);
@@ -33,12 +42,13 @@ public:
     double getPosY() const { return y_pos; }
     double getVelX() const { return x_vel; }
     double getvelY() const { return y_vel; }
+    double getRadius() const { return radius; }
 
     sf::Vector2f getPos() { return sf::Vector2f(x_pos, y_pos); }
     sf::Vector2f getVel() { return sf::Vector2f(x_vel, y_vel); }
 
 private:
-    double x_pos, y_pos, x_vel, y_vel;
+    double x_pos, y_pos, x_vel, y_vel, radius;
 };
 
 class Quadtree {

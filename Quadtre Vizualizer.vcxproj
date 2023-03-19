@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{e6e0dd95-8026-4cc6-aecc-f0f740864559}</ProjectGuid>
-    <RootNamespace>Quadtree_Visualization</RootNamespace>
+    <ProjectGuid>{1e4f329f-0afc-4495-8256-eb1562924c5b}</ProjectGuid>
+    <RootNamespace>Quadtre_Vizualizer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -54,7 +54,7 @@ int main()
     float random_velx = (float)rand() / RAND_MAX * 4.0f - 2;
     float random_vely = (float)rand() / RAND_MAX * 4.0f - 2;
 
-    Point* queryPoint = new Point(random_posx, random_posy, random_velx, random_vely);
+    Point* queryPoint = new Point(random_posx, random_posy, random_velx, random_vely, 0);
 
     points.push_back(queryPoint);
 
@@ -62,7 +62,7 @@ int main()
     for (const auto& point : points) {
         qt.insert(point);
     }
-    
+
     //Calculation Settings
     const int batch_size = 100;
 
@@ -81,7 +81,7 @@ int main()
                     float random_velx = (float)rand() / RAND_MAX * 4.0f - 2;
                     float random_vely = (float)rand() / RAND_MAX * 4.0f - 2;
 
-                    Point* newPoint = new Point(mousePosition.x, mousePosition.y, random_velx, random_vely);
+                    Point* newPoint = new Point(mousePosition.x, mousePosition.y, random_velx, random_vely, 0);
 
                     points.push_back(newPoint);
                 }
@@ -98,7 +98,7 @@ int main()
             int end = std::min(start + batch_size, static_cast<int>(points.size()) - 1);
             threads.push_back(std::thread(updatePoints, std::ref(points), start, end));
         }
-        
+
         for (auto& thread : threads) {
             thread.join();
         }
@@ -116,7 +116,7 @@ int main()
         std::vector<Box*> boxes = qt.getBoxes();
         sf::VertexArray lines(sf::Lines, boxes.size() * 8);
 
-        sf::Color lineColor(0,255,0);
+        sf::Color lineColor(0, 255, 0);
         for (int i = 0; i < boxes.size(); i++) {
             Box* box = boxes[i];
             int leftBound = box->getLeftBound();
@@ -124,9 +124,9 @@ int main()
             int upperBound = box->getUpperBound();
             int lowerBound = box->getLowerBound();
 
-            lines[8 * i + 0] = sf::Vertex(sf::Vector2f(leftBound,upperBound), lineColor);
+            lines[8 * i + 0] = sf::Vertex(sf::Vector2f(leftBound, upperBound), lineColor);
             lines[8 * i + 1] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
-        
+
             lines[8 * i + 2] = sf::Vertex(sf::Vector2f(rightBound, upperBound), lineColor);
             lines[8 * i + 3] = sf::Vertex(sf::Vector2f(rightBound, lowerBound), lineColor);
 
@@ -167,7 +167,7 @@ int main()
         //Querybox Draw Points in Box
         std::vector<Point*> pointsInBox;
         sf::Vector2f queryCenter(queryPoint->getPosX(), queryPoint->getPosY());
-        Box queryBox2(&queryCenter, 200,200);
+        Box queryBox2(&queryCenter, 200, 200);
         pointsInBox = qt.getPointsInBox(&queryBox2);
 
         sf::VertexArray verticesInBox(sf::Points);

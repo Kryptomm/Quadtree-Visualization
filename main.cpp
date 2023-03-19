@@ -10,7 +10,7 @@
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const int BRUSH_SIZE = 1000;
+const int BRUSH_SIZE = 10;
 
 //Define the Size of the Quadtree
 sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -141,15 +141,17 @@ int main()
 
         //Draw Points
         sf::VertexArray vertices(sf::Points);
-        float radius = 3;
+        
         for (int i = 0; i < points.size(); i++) {
+            Point* point = points[i];
             sf::Color color(sf::Color::White);
-            sf::Vertex vertex(sf::Vector2f(points[i]->getPosX(), points[i]->getPosY()), color);
+            sf::Vertex vertex(sf::Vector2f(point->getPosX(), point->getPosY()), color);
             vertices.append(vertex);
+            float radius = point->getRadius();
             for (int j = 0; j <= 360; j += 40) {
                 float angle = static_cast<float>(j) * 3.14159f / 180.f;
-                float px = points[i]->getPosX() + std::cos(angle) * radius;
-                float py = points[i]->getPosY() + std::sin(angle) * radius;
+                float px = point->getPosX() + std::cos(angle) * radius;
+                float py = point->getPosY() + std::sin(angle) * radius;
                 vertices.append(sf::Vertex(sf::Vector2f(px, py), color));
             }
         }
@@ -177,8 +179,8 @@ int main()
             vertices.append(vertex);
             for (int j = 0; j <= 360; j += 10) {
                 float angle = static_cast<float>(j) * 3.14159f / 180.f;
-                float px = pointsInBox[i]->getPosX() + std::cos(angle) * radius;
-                float py = pointsInBox[i]->getPosY() + std::sin(angle) * radius;
+                float px = pointsInBox[i]->getPosX() + std::cos(angle) * 3;
+                float py = pointsInBox[i]->getPosY() + std::sin(angle) * 3;
                 verticesInBox.append(sf::Vertex(sf::Vector2f(px, py), color));
             }
         }

@@ -18,6 +18,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Ressourcendateien</Filter>
     </ClCompile>
+    <ClCompile Include="Box.cpp">
+      <Filter>Ressourcendateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.hpp">

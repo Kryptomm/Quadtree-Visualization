@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <thread>
 #include <chrono>
+#include <tuple>
 #include "Box.hpp"
 #include "Quadtree.hpp"
 
@@ -22,6 +23,41 @@ void updatePoints(std::vector<Point*> points, int start, int end) {
     }
 }
 
+std::tuple<std::vector<Point*>,int> optCheckCollisions(std::vector<Point*> points, Quadtree* quadtree) {
+    std::vector<Point*> collidedPoints;
+    int checks = 0;
+
+    for (Point* point : points) {
+        sf::Vector2f center = point->getPos();
+        Box box = Box(&center, 2 * 5 + 1, 2 * 5 + 1);
+        std::vector<Point*> pointsInBoxRange(quadtree->getPointsInBox(&box));
+        for (Point* otherPoint : pointsInBoxRange) {
+            if (point != otherPoint && point->isCollidingWithPoint(otherPoint)) {
+                collidedPoints.push_back(point);
+            }
+            checks++;
+        }
+
+    }
+    return std::make_tuple(collidedPoints, checks);
+}
+
+std::tuple<std::vector<Point*>, int> CheckCollisions(std::vector<Point*> points, Quadtree* quadtree) {
+    std::vector<Point*> collidedPoints;
+    int checks = 0;
+
+    for (int i = 0; i < points.size(); i++) {
+        for(int j = i + 1; j < points.size(); j++){
+            if (points[i]->isCollidingWithPoint(points[j])) {
+                collidedPoints.push_back(points[i]);
+                collidedPoints.push_back(points[j]);
+            }
+            checks++;
+        }
+    }
+    return std::make_tuple(collidedPoints, checks);
+}
+
 int main()
 {
     //Window Settings
@@ -34,15 +70,29 @@ int main()
     sf::Font font;
     if (!font.loadFromFile("arial.ttf"))
     {
-        // handle error
+        std::cout << "Please insert arial.tff into this folger" << std::endl;
     }
 
     //Text Settings
-    sf::Text pointsText;
-    pointsText.setFont(font);
-    pointsText.setCharacterSize(24);
-    pointsText.setFillColor(sf::Color::White);
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::White);
+
+    sf::Text pointsText = text;
     pointsText.setPosition(0, 0);
+
+    sf::Text fpsText = text;
+    fpsText.setPosition(0, 24);
+
+    sf::Text collisionChecksText = text;
+    collisionChecksText.setPosition(0, 48);
+
+    sf::Text optCollisionChecksText = text;
+    optCollisionChecksText.setPosition(0, 72);
+
+    sf::Text collisionsText = text;
+    collisionsText.setPosition(0, 96);
 
     //Saves all Points to a list that can be used to build new Quadtrees
     std::vector<Point*> points;
@@ -58,7 +108,7 @@ int main()
 
     points.push_back(queryPoint);
 
-    Quadtree qt = Quadtree(1, box);
+    Quadtree qt = Quadtree(5, box);
     for (const auto& point : points) {
         qt.insert(point);
     }
@@ -105,15 +155,27 @@ int main()
         }
 
         //Create a new Quadtree based on the new Positions of the points.
-        qt = Quadtree(1, box);
+        qt = Quadtree(5, box);
         for (const auto& point : points) {
             qt.insert(point);
         }
+
+        //Check for Collisions
+        std::vector<Point*> collidingPoints;
+        int calculationsCount = 0;
+
+        tie(collidingPoints, calculationsCount) = optCheckCollisions(points, &qt);
+        //tie(collidingPoints, calculationsCount) = CheckCollisions(points, &qt);
 
         //clear the current Window
         window.clear();
 
         //Draw everything in the Window
+
+        /*
+        Drawing the Boxes of the Quadtree by adding Vertices in a Vertexarray that are going
+        from TL -> TR, TR -> BR, BR -> BL, BL -> TL.
+        */
         std::vector<Box*> boxes = qt.getBoxes();
         sf::VertexArray lines(sf::Lines, boxes.size() * 8);
 
@@ -158,6 +220,14 @@ int main()
         }
         window.draw(vertices);
 
+        //Text Modifications
+        int normalCollisionChecks = points.size() * (points.size() - 1) / 2;
+
+        pointsText.setString("Points: " + std::to_string(points.size()));
+        collisionChecksText.setString("Normal Checks: " + std::to_string(normalCollisionChecks));
+        optCollisionChecksText.setString("opt Checks: " + std::to_string(calculationsCount));
+        collisionsText.setString("Collisions: " + std::to_string(collidingPoints.size() / 2));
+
         //Draw Querybox
         sf::Vector2f queryBox(200, 200);
         sf::RectangleShape square(queryBox);
@@ -190,15 +260,18 @@ int main()
         window.draw(verticesInBox);
 
         //Draw Text
-        pointsText.setString("Points: " + std::to_string(points.size()));
         window.draw(pointsText);
+        window.draw(fpsText);
+        window.draw(collisionChecksText);
+        window.draw(optCollisionChecksText);
+        window.draw(collisionsText);
 
         //Show Window
         window.display();
 
         frame_count++;
         if (clock.getElapsedTime().asSeconds() >= 1.0f) {
-            std::cout << "FPS: " << frame_count << std::endl;
+            fpsText.setString("FPS: " + std::to_string(frame_count));
             frame_count = 0;
             clock.restart();
         }

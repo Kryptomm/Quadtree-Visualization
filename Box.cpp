@@ -1,30 +1,19 @@
 #include "Box.hpp"
 
-Box::Box(sf::Vector2f* c, double w, double h)
-    : center(*c), width(w), height(h)
-{}
+Box::Box(sf::Vector2f* c, double w, double h) : center(*c), width(w), height(h) {
+    rightBound = center.x + width / 2;
+    leftBound = center.x - width / 2;
+    upperBound = center.y - height / 2;
+    lowerBound = center.y + height / 2;
+}
+
 
 bool Box::intersects(Box* const otherBox)
 {
-    // Calculate half width and half height of each rectangle
-    float halfWidth1 = width / 2;
-    float halfHeight1 = height / 2;
-    float halfWidth2 = otherBox->getWidth() / 2;
-    float halfHeight2 = otherBox->getHeigth() / 2;
-
-    // Calculate the minimum and maximum x and y coordinates of each rectangle
-    float minX1 = center.x - halfWidth1;
-    float minY1 = center.y - halfHeight1;
-    float maxX1 = center.x + halfWidth1;
-    float maxY1 = center.y + halfHeight1;
-
-    float minX2 = otherBox->center.x - halfWidth2;
-    float minY2 = otherBox->center.y - halfHeight2;
-    float maxX2 = otherBox->center.x + halfWidth2;
-    float maxY2 = otherBox->center.y + halfHeight2;
-
-    // Check for intersection
-    return (minX1 <= maxX2 && maxX1 >= minX2 && minY1 <= maxY2 && maxY1 >= minY2);
+    return !(getLeftBound() > otherBox->getRightBound()
+        || getRightBound() < otherBox->getLeftBound()
+        || getLowerBound() < otherBox->getUpperBound()
+        || getUpperBound() > otherBox->getLowerBound());
 }
 
 bool Box::pointInBox(sf::Vector2f* point)
@@ -43,40 +32,14 @@ bool Box::pointInBox(sf::Vector2f* point)
     }
 }
 
-sf::Vector2f Box::getCenter() const
-{
-    return center;
-}
+sf::Vector2f Box::getCenter() const { return center; }
+double Box::getWidth() const { return width; }
+double Box::getHeigth() const{ return height; }
+double Box::getRightBound() const { return rightBound; }
+double Box::getLeftBound() const { return leftBound; }
+double Box::getUpperBound() const { return  upperBound; }
+double Box::getLowerBound() const { return  lowerBound; }
 
-double Box::getWidth() const
-{
-    return width;
-}
-
-double Box::getHeigth() const
-{
-    return height;
-}
-
-double Box::getRightBound() const
-{
-    return center.x + width / 2;
-}
-
-double Box::getLeftBound() const
-{
-    return center.x - width / 2;
-}
-
-double Box::getUpperBound() const
-{
-    return center.y - height / 2;
-}
-
-double Box::getLowerBound() const
-{
-    return center.y + height / 2;
-}
 
 std::ostream& operator<<(std::ostream& s, const Box& box) {
     return s << "Center: (" + std::to_string(box.getCenter().x) + "," + std::to_string(box.getCenter().y) + ")" + "\n"

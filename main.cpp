@@ -11,7 +11,7 @@
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const int BRUSH_SIZE = 10;
+const int BRUSH_SIZE = 100;
 
 //Define the Size of the Quadtree
 sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -27,15 +27,20 @@ std::tuple<std::vector<Point*>,int> optCheckCollisions(std::vector<Point*> point
     std::vector<Point*> collidedPoints;
     int checks = 0;
 
+
     for (Point* point : points) {
         sf::Vector2f center = point->getPos();
         Box box = Box(&center, 2 * 5 + 1, 2 * 5 + 1);
+
         std::vector<Point*> pointsInBoxRange(quadtree->getPointsInBox(&box));
+
         for (Point* otherPoint : pointsInBoxRange) {
-            if (point != otherPoint && point->isCollidingWithPoint(otherPoint)) {
-                collidedPoints.push_back(point);
+            if (point != otherPoint) {
+                if (point->isCollidingWithPoint(otherPoint)) {
+                    collidedPoints.push_back(point);
+                }
+                checks++;
             }
-            checks++;
         }
 
     }
@@ -164,8 +169,15 @@ int main()
         std::vector<Point*> collidingPoints;
         int calculationsCount = 0;
 
+        //auto start = std::chrono::high_resolution_clock::now();
+
         tie(collidingPoints, calculationsCount) = optCheckCollisions(points, &qt);
         //tie(collidingPoints, calculationsCount) = CheckCollisions(points, &qt);
+
+        //auto end = std::chrono::high_resolution_clock::now();
+        //auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        //std::cout << "Time taken by code: " << duration.count()/1000 << " ms." << std::endl;
+
 
         //clear the current Window
         window.clear();

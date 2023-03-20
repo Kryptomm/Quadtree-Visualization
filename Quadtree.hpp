@@ -142,8 +142,9 @@ public:
         }
     }
 
-    std::vector<Point*> getPointsInBox(Box* queryBox) {
+    std::vector<Point*> getPointsInBox(Box* const queryBox) {
         std::vector<Point*> pointsInBox;
+        pointsInBox.reserve(points.size());
 
         if (!box.intersects(queryBox)) return pointsInBox;
 
@@ -166,7 +167,7 @@ public:
             for (const auto& p : points) {
                 sf::Vector2f pos = p->getPos();
                 if (queryBox->pointInBox(&pos)) {
-                    pointsInBox.push_back(p);
+                    pointsInBox.emplace_back(p);
                 }
             }
         }

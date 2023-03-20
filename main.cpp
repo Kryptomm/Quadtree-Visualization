@@ -12,6 +12,7 @@
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const int BRUSH_SIZE = 100;
+const int CAPACITY = 10;
 
 //Define the Size of the Quadtree
 sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -26,7 +27,6 @@ void updatePoints(std::vector<Point*> points, int start, int end) {
 std::tuple<std::vector<Point*>,int> optCheckCollisions(std::vector<Point*> points, Quadtree* quadtree) {
     std::vector<Point*> collidedPoints;
     int checks = 0;
-
 
     for (Point* point : points) {
         sf::Vector2f center = point->getPos();
@@ -113,13 +113,13 @@ int main()
 
     points.push_back(queryPoint);
 
-    Quadtree qt = Quadtree(5, box);
+    Quadtree qt = Quadtree(CAPACITY, box);
     for (const auto& point : points) {
         qt.insert(point);
     }
 
     //Calculation Settings
-    const int batch_size = 100;
+    const int batch_size = 200;
 
     //Window Loop
     while (window.isOpen()) {
@@ -160,7 +160,7 @@ int main()
         }
 
         //Create a new Quadtree based on the new Positions of the points.
-        qt = Quadtree(5, box);
+        qt = Quadtree(CAPACITY, box);
         for (const auto& point : points) {
             qt.insert(point);
         }
@@ -171,7 +171,7 @@ int main()
 
         //auto start = std::chrono::high_resolution_clock::now();
 
-        tie(collidingPoints, calculationsCount) = optCheckCollisions(points, &qt);
+        //tie(collidingPoints, calculationsCount) = optCheckCollisions(points, &qt);
         //tie(collidingPoints, calculationsCount) = CheckCollisions(points, &qt);
 
         //auto end = std::chrono::high_resolution_clock::now();
@@ -234,10 +234,14 @@ int main()
 
         //Text Modifications
         int normalCollisionChecks = points.size() * (points.size() - 1) / 2;
+        int timesLessChecks = 0;
+        if (calculationsCount != 0) {
+            timesLessChecks = normalCollisionChecks / calculationsCount;
+        }
 
         pointsText.setString("Points: " + std::to_string(points.size()));
         collisionChecksText.setString("Normal Checks: " + std::to_string(normalCollisionChecks));
-        optCollisionChecksText.setString("opt Checks: " + std::to_string(calculationsCount));
+        optCollisionChecksText.setString("opt Checks: " + std::to_string(calculationsCount) + " (" + std::to_string(timesLessChecks) + ")");
         collisionsText.setString("Collisions: " + std::to_string(collidingPoints.size() / 2));
 
         //Draw Querybox

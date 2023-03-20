@@ -38,11 +38,11 @@ int main()
     }
 
     //Text Settings
-    sf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::White);
-    text.setPosition(0, 0);
+    sf::Text pointsText;
+    pointsText.setFont(font);
+    pointsText.setCharacterSize(24);
+    pointsText.setFillColor(sf::Color::White);
+    pointsText.setPosition(0, 0);
 
     //Saves all Points to a list that can be used to build new Quadtrees
     std::vector<Point*> points;
@@ -80,8 +80,9 @@ int main()
 
                     float random_velx = (float)rand() / RAND_MAX * 4.0f - 2;
                     float random_vely = (float)rand() / RAND_MAX * 4.0f - 2;
+                    float random_radius = (float)rand() / RAND_MAX * 4.0f + 1;
 
-                    Point* newPoint = new Point(mousePosition.x, mousePosition.y, random_velx, random_vely, 0);
+                    Point* newPoint = new Point(mousePosition.x, mousePosition.y, random_velx, random_vely, random_radius);
 
                     points.push_back(newPoint);
                 }
@@ -95,7 +96,7 @@ int main()
         std::vector<std::thread> threads;
         for (int i = 0; i < num_batches; i++) {
             int start = i * batch_size;
-            int end = std::min(start + batch_size, static_cast<int>(points.size()) - 1);
+            int end = std::min(start + batch_size, static_cast<int>(points.size()));
             threads.push_back(std::thread(updatePoints, std::ref(points), start, end));
         }
 
@@ -174,21 +175,23 @@ int main()
 
         sf::VertexArray verticesInBox(sf::Points);
         for (int i = 0; i < pointsInBox.size(); i++) {
+            Point* point = pointsInBox[i];
             sf::Color color(sf::Color::Red);
-            sf::Vertex vertex(sf::Vector2f(pointsInBox[i]->getPosX(), pointsInBox[i]->getPosY()), color);
-            vertices.append(vertex);
+            sf::Vertex vertex(sf::Vector2f(point->getPosX(), point->getPosY()), color);
+            verticesInBox.append(vertex);
+            float radius = point->getRadius();
             for (int j = 0; j <= 360; j += 10) {
                 float angle = static_cast<float>(j) * 3.14159f / 180.f;
-                float px = pointsInBox[i]->getPosX() + std::cos(angle) * 3;
-                float py = pointsInBox[i]->getPosY() + std::sin(angle) * 3;
+                float px = point->getPosX() + std::cos(angle) * radius;
+                float py = point->getPosY() + std::sin(angle) * radius;
                 verticesInBox.append(sf::Vertex(sf::Vector2f(px, py), color));
             }
         }
         window.draw(verticesInBox);
 
         //Draw Text
-        text.setString("Points: " + std::to_string(points.size()));
-        window.draw(text);
+        pointsText.setString("Points: " + std::to_string(points.size()));
+        window.draw(pointsText);
 
         //Show Window
         window.display();

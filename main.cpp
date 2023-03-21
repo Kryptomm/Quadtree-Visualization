@@ -12,7 +12,7 @@
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const int BRUSH_SIZE = 100;
-const int CAPACITY = 10;
+const int CAPACITY = 50;
 
 //Define the Size of the Quadtree
 sf::Vector2f Center1(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -32,7 +32,7 @@ std::tuple<std::vector<Point*>,int> optCheckCollisions(std::vector<Point*> point
         sf::Vector2f center = point->getPos();
         Box box = Box(&center, 2 * 5 + 1, 2 * 5 + 1);
 
-        std::vector<Point*> pointsInBoxRange(quadtree->getPointsInBox(&box));
+        std::vector<Point*> pointsInBoxRange(quadtree->getPointsInBoxIte(&box));
 
         for (Point* otherPoint : pointsInBoxRange) {
             if (point != otherPoint) {
@@ -171,7 +171,7 @@ int main()
 
         //auto start = std::chrono::high_resolution_clock::now();
 
-        //tie(collidingPoints, calculationsCount) = optCheckCollisions(points, &qt);
+        tie(collidingPoints, calculationsCount) = optCheckCollisions(points, &qt);
         //tie(collidingPoints, calculationsCount) = CheckCollisions(points, &qt);
 
         //auto end = std::chrono::high_resolution_clock::now();
@@ -220,7 +220,7 @@ int main()
         for (int i = 0; i < points.size(); i++) {
             Point* point = points[i];
             sf::Color color(sf::Color::White);
-            sf::Vertex vertex(sf::Vector2f(point->getPosX(), point->getPosY()), color);
+            sf::Vertex vertex(point->getPos() , color);
             vertices.append(vertex);
             float radius = point->getRadius();
             for (int j = 0; j <= 360; j += 40) {
@@ -255,9 +255,10 @@ int main()
 
         //Querybox Draw Points in Box
         std::vector<Point*> pointsInBox;
-        sf::Vector2f queryCenter(queryPoint->getPosX(), queryPoint->getPosY());
+        sf::Vector2f queryCenter = queryPoint->getPos();
         Box queryBox2(&queryCenter, 200, 200);
-        pointsInBox = qt.getPointsInBox(&queryBox2);
+
+        pointsInBox = qt.getPointsInBoxIte(&queryBox2);
 
         sf::VertexArray verticesInBox(sf::Points);
         for (int i = 0; i < pointsInBox.size(); i++) {

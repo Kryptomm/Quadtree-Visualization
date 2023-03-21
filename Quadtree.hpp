@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <queue>
 
 class Point {
 public:
@@ -174,6 +175,51 @@ public:
         return pointsInBox;
     }
 
+    std::vector<Point*> getPointsInBoxIte(Box* const queryBox) {
+        std::vector<Point*> pointsInBox;
+
+        if (!divided) {
+            for (const auto& p : points) {
+                sf::Vector2f pos = p->getPos();
+                if (queryBox->pointInBox(&pos)) {
+                    pointsInBox.emplace_back(p);
+                }
+            }
+            return pointsInBox;
+        }
+
+        std::queue<Quadtree*> queue;
+        queue.push(topLeft.get());
+        queue.push(topRight.get());
+        queue.push(bottomLeft.get());
+        queue.push(bottomRight.get());
+
+        while (!queue.empty()) {
+            Quadtree* currentTree = queue.front();
+            queue.pop();
+
+            if (currentTree->isDivided()) {
+                if (currentTree->getBox().intersects(queryBox)) {
+                    queue.push(currentTree->topLeft.get());
+                    queue.push(currentTree->topRight.get());
+                    queue.push(currentTree->bottomLeft.get());
+                    queue.push(currentTree->bottomRight.get());
+
+                }
+            }
+            else {
+                for (const auto& p : currentTree->getPoints()) {
+                    sf::Vector2f pos = p->getPos();
+                    if (queryBox->pointInBox(&pos)) {
+                        pointsInBox.emplace_back(p);
+                    }
+                }
+            }
+        }
+        return pointsInBox;
+    }
+
+
     std::vector<Box*> getBoxes() {
         std::vector<Box*> boxes;
 
@@ -198,6 +244,9 @@ public:
     }
 
     std::vector<Point*> getPoints() { return points; }
+    Box getBox() { return box; }
+    bool isDivided() { return divided; }
+
 
 private:
     int maxSize;

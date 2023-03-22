@@ -11,7 +11,7 @@
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
-const int BRUSH_SIZE = 100;
+const int BRUSH_SIZE = 50;
 const int CAPACITY = 50;
 
 //Define the Size of the Quadtree

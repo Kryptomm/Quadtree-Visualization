@@ -75,7 +75,7 @@ int main()
     sf::Font font;
     if (!font.loadFromFile("arial.ttf"))
     {
-        std::cout << "Please insert arial.tff into this folger" << std::endl;
+        std::cout << "Please insert arial.tff into this folder" << std::endl;
     }
 
     //Text Settings
